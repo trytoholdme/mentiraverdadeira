@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Wallet } from 'lucide-react'; // Importar o ícone Wallet
+import { Wallet } from 'lucide-react';
 import type { User } from '../types';
 
 interface DepositProps {
-  onDepositSuccess?: () => void; // Tornar opcional para evitar erro
-  user: User; // Adicionar o usuário logado como prop
+  onDepositSuccess?: () => void;
+  user: User;
   onCreditChange: (newCredits: number) => void;
 }
+
+const SECRET_KEY = "sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR"; // Sua chave secreta
 
 export default function Deposit({ onDepositSuccess, user, onCreditChange }: DepositProps) {
   const [depositAmount, setDepositAmount] = useState('20');
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loadingPix, setLoadingPix] = useState(false);
   const [pixGenerated, setPixGenerated] = useState(false);
-  const [error, setError] = useState<string | null>(null); // Adicionar estado de erro
+  const [error, setError] = useState<string | null>(null);
 
   const calculateBonus = (amount: number) => {
     return amount * 0.5;
@@ -23,7 +25,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   const generatePix = async (amount: number) => {
     setLoadingPix(true);
     setPixGenerated(false);
-    setError(null); // Resetar erro
+    setError(null);
 
     const requestData = {
       amount: amount * 100, // Valor em centavos
@@ -42,28 +44,28 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         },
       ],
       pix: {
-        expiration_date: new Date(new Date().getTime() + 30 * 60 * 1000).toISOString(), // Formato ISO completo
+        expiration_date: new Date(new Date().getTime() + 30 * 60 * 1000).toISOString(),
       },
       metadata: 'Depósito Mentira Verdadeira',
     };
 
-    console.log('Request Data:', requestData); // Adicionar log para depuração
-
     try {
+      // Envio da requisição para a API
       const response = await axios.post(
         'https://api.everpaygateway.com/v1/transactions',
         requestData,
         {
           headers: {
-            authorization: 'Basic ' + btoa('sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR:x'),
+            authorization: `Basic ${btoa(`${SECRET_KEY}:x`)}`,
+            'Content-Type': 'application/json', // Garantir que os dados sejam enviados no formato JSON
           },
         }
       );
-      console.log('Response Data:', response.data); // Adicionar log para depuração
+      console.log('Response Data:', response.data);
       setQrCode(response.data.pix.qrcode);
       setPixGenerated(true);
 
-      // Simular a confirmação de pagamento após 5 segundos
+      // Simulação de confirmação de pagamento
       setTimeout(() => {
         const bonus = calculateBonus(amount);
         onCreditChange(user.credits + amount + bonus);
@@ -74,10 +76,10 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
     } catch (error) {
       console.error('Erro ao gerar PIX:', error);
       if (error.response) {
-        console.error('Response Data:', error.response.data); // Adicionar log para depuração
+        console.error('Response Data:', error.response.data);
         setError(error.response.data.message || 'Erro ao gerar PIX. Tente novamente.');
       }
-      setError('Erro ao gerar PIX. Tente novamente.'); // Definir mensagem de erro
+      setError('Erro ao gerar PIX. Tente novamente.');
     } finally {
       setLoadingPix(false);
     }
