@@ -15,7 +15,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   const [loadingPix, setLoadingPix] = useState(false);
   const [pixGenerated, setPixGenerated] = useState(false);
   const [error, setError] = useState<string | null>(null); // Adicionar estado de erro
-  const [pixUrl, setPixUrl] = useState<string | null>(null); // Adicionar estado para a URL Pix
+  const [pixCode, setPixCode] = useState<string | null>(null); // Adicionar estado para o código Pix
 
   const calculateBonus = (amount: number) => {
     return amount * 0.5;
@@ -45,8 +45,8 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         }
       } else if (transactionData.status === 'waiting_payment') {
         console.log('Pagamento aguardando:', transactionData);
-        setPixUrl(transactionData.secureUrl); // Usar secureUrl aqui
-        setError('Aguardando pagamento. Copie a URL e faça o pagamento no seu banco.');
+        setPixCode(transactionData.pix.qrcode); // Exibir o código Pix gerado
+        setError('Aguardando pagamento. Copie o código e faça o pagamento no seu banco.');
       } else {
         console.log('Pagamento ainda não processado:', transactionData);
         setError('Pagamento não processado. Tente novamente.');
@@ -130,8 +130,8 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
           onDepositSuccess();
         }
       } else if (response.data.status === 'waiting_payment') {
-        setPixUrl(response.data.secureUrl); // Usar secureUrl para copiar e colar
-        setError('Aguardando pagamento. Copie a URL e faça o pagamento no seu banco.');
+        setPixCode(response.data.pix.qrcode); // Salvar o código Pix gerado
+        setError('Aguardando pagamento. Copie o código e faça o pagamento no seu banco.');
         // Verificar o status após a geração do Pix
         checkPaymentStatus(response.data.id, encodedSecretKey);
       } else {
@@ -225,12 +225,10 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         </div>
       )}
 
-      {pixUrl && (
+      {pixCode && (
         <div className="mt-6 text-center">
-          <h3 className="text-lg font-bold text-white mb-4">Ou copie e cole no seu banco</h3>
-          <a href={pixUrl} className="text-blue-500" target="_blank" rel="noopener noreferrer">
-            {pixUrl}
-          </a>
+          <h3 className="text-lg font-bold text-white mb-4">Ou copie o código para realizar o pagamento</h3>
+          <pre className="text-white bg-gray-800 p-4 rounded-lg break-all">{pixCode}</pre>
         </div>
       )}
     </div>
