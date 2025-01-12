@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { Wallet } from 'lucide-react'; // Importar o ícone wallet
+import { Wallet } from 'lucide-react';
 import type { User } from '../types';
 
 interface DepositProps {
-  onDepositSuccess?: () => void; // Tornar opcional para evitar erro
-  user: User; // Adicionar o usuário logado como prop
+  onDepositSuccess?: () => void;
+  user: User;
   onCreditChange: (newCredits: number) => void;
 }
 
@@ -14,9 +14,9 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loadingPix, setLoadingPix] = useState(false);
   const [pixGenerated, setPixGenerated] = useState(false);
-  const [error, setError] = useState<string | null>(null); // Adicionar estado de erro
-  const [pixCode, setPixCode] = useState<string | null>(null); // Adicionar estado para o código Pix
-  const [copySuccess, setCopySuccess] = useState(false); // Estado para controle de cópia
+  const [error, setError] = useState<string | null>(null);
+  const [pixCode, setPixCode] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const calculateBonus = (amount: number) => {
     return amount * 0.5;
@@ -48,8 +48,8 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         }
       } else if (transactionData.status === 'waiting_payment') {
         console.log('Pagamento aguardando:', transactionData);
-        setPixCode(transactionData.pix.qrcode); // Atualizando o pixCode
-        setError(null); // Limpar mensagem de erro
+        setPixCode(transactionData.pix.qrcode);
+        setError(null);
       } else {
         console.log('Pagamento ainda não processado:', transactionData);
         setError('Pagamento não processado. Tente novamente.');
@@ -65,19 +65,17 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
     setPixGenerated(false);
     setError(null);
 
-    // Verifica se os dados do cliente estão completos
     if (!user.name || !user.email || !user.phone || !user.document) {
       setError('Dados do cliente estão incompletos. Verifique nome, e-mail, telefone e documento.');
       setLoadingPix(false);
       return;
     }
 
-    // Determina o tipo do documento (CPF ou CNPJ)
-    const isCpf = user.document.length === 11; // CPF tem 11 caracteres
-    const documentType = isCpf ? 'cpf' : 'cnpj'; // Considera CPF ou CNPJ
+    const isCpf = user.document.length === 11;
+    const documentType = isCpf ? 'cpf' : 'cnpj';
 
     const requestData = {
-      amount: amount * 100, // Valor em centavos
+      amount: amount * 100,
       paymentMethod: 'pix',
       customer: {
         name: user.name.trim(),
@@ -123,7 +121,6 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
 
       console.log('Response Data:', response.data);
 
-      // Verificar se o pagamento foi realizado com sucesso
       if (response.data.paidAmount > 0) {
         setQrCode(response.data.pix.qrcode);
         setPixGenerated(true);
@@ -135,13 +132,11 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
           onDepositSuccess();
         }
       } else if (response.data.status === 'waiting_payment') {
-        setPixCode(response.data.pix.qrcode); // Salvar o código Pix gerado
-        setError(null); // Limpar mensagem de erro
-        // Verificar o status após a geração do Pix
+        setPixCode(response.data.pix.qrcode);
+        setError(null);
         checkPaymentStatus(response.data.id, encodedSecretKey);
       } else {
         setError('Pagamento não foi processado. Tentando verificar status...');
-        // Se o pagamento não foi confirmado, verifique o status
         checkPaymentStatus(response.data.id, encodedSecretKey);
       }
     } catch (error: any) {
@@ -174,15 +169,13 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
 
   const bonus = calculateBonus(Number(depositAmount));
 
-  // Função para copiar o código Pix para a área de transferência
   const copyToClipboard = (code: string) => {
     navigator.clipboard.writeText(code).then(() => {
       setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000); // Mensagem de sucesso por 2 segundos
+      setTimeout(() => setCopySuccess(false), 2000);
     });
   };
 
-  // Função para atualizar os créditos do usuário no localStorage
   const updateUserCredits = (email: string, newCredits: number) => {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const updatedUsers = users.map((u: User) => {
