@@ -213,4 +213,8 @@ export default function Register({ onBack, onSuccess }: RegisterProps) {
           >
             {loading ? 'Criando Conta...' : 'Criar Conta e Ganhar R$ 5,00'}
           </button>
- 
+        </form>
+      </div>
+    </div>
+  );
+}
