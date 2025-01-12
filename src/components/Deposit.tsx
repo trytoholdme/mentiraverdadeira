@@ -230,11 +230,12 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         <div className="mt-6 text-center">
           <h3 className="text-lg font-semibold text-white mb-2">Pix Gerado</h3>
           {qrCode && <img src={qrCode} alt="QR Code Pix" className="w-64 h-64 mx-auto" />}
-          <p className="mt-4 text-gray-300">Clique no Copia e Cola para copiar e cole no seu Banco para pagar.</p>
+          <p className="mt-4 text-gray-300">Escaneie o código ou copie o código abaixo para pagar.</p>
           <div className="mt-4">
             <pre
-              className="text-sm text-gray-300 bg-gray-800 p-4 rounded-lg cursor-pointer"
+              className="text-sm text-gray-300 bg-gray-800 p-4 rounded-lg cursor-pointer whitespace-pre-wrap break-words"
               onClick={() => copyToClipboard(pixCode)}
+              style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
             >
               {pixCode}
             </pre>
