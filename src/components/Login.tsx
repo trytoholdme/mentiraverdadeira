@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { ArrowLeft, LogIn } from 'lucide-react';
-import { validateCredentials } from '../lib/auth';
 import type { User } from '../types';
 
 interface LoginProps {
@@ -11,22 +11,23 @@ interface LoginProps {
 export default function Login({ onBack, onSuccess }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const user = validateCredentials(email, password);
-      if (user) {
-        onSuccess(user);
-      } else {
-        setError('Email ou senha incorretos');
-      }
-    } catch (err) {
+      const response = await axios.post('/api/login', {
+        email,
+        password,
+      });
+      // Salvar token de autenticação ou redirecionar o usuário
+      setError(null);
+      onSuccess(response.data.user);
+    } catch (error) {
       setError('Erro ao fazer login. Tente novamente.');
     } finally {
       setLoading(false);
@@ -55,7 +56,7 @@ export default function Login({ onBack, onSuccess }: LoginProps) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-gray-300 mb-2" htmlFor="email">
               Email
