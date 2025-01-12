@@ -21,95 +21,98 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   };
 
   const generatePix = async (amount: number) => {
-    setLoadingPix(true);
-    setPixGenerated(false);
-    setError(null);
+  setLoadingPix(true);
+  setPixGenerated(false);
+  setError(null);
 
-    // Verifica se os dados do cliente estão completos
-    if (!user.name || !user.email || !user.phone || !user.document) {
-      setError('Dados do cliente estão incompletos. Verifique nome, e-mail, telefone e documento.');
-      setLoadingPix(false);
-      return;
-    }
+  // Verifica se os dados do cliente estão completos
+  if (!user.name || !user.email || !user.phone || !user.document) {
+    setError('Dados do cliente estão incompletos. Verifique nome, e-mail, telefone e documento.');
+    setLoadingPix(false);
+    return;
+  }
 
-    // Determina o tipo do documento (CPF ou CNPJ)
-    const isCpf = user.document.length === 11; // CPF tem 11 caracteres
-    const documentType = isCpf ? 'cpf' : 'cnpj'; // Considera CPF ou CNPJ
+  // Determina o tipo do documento (CPF ou CNPJ)
+  const isCpf = user.document.length === 11; // CPF tem 11 caracteres
+  const documentType = isCpf ? 'cpf' : 'cnpj'; // Considera CPF ou CNPJ
 
-    const requestData = {
-      amount: amount * 100, // Valor em centavos
-      paymentMethod: 'pix', // Corrigido para 'paymentMethod'
-      customer: {
-        name: user.name.trim(),
-        email: user.email.trim().toLowerCase(),
-        phone: user.phone.trim().replace(/\D/g, ''),
-        document: {
-          number: user.document.trim().replace(/\D/g, ''),
-          type: documentType, // Define o tipo de documento (cpf ou cnpj)
+  const requestData = {
+    amount: amount * 100, // Valor em centavos
+    paymentMethod: 'pix',
+    customer: {
+      name: user.name.trim(),
+      email: user.email.trim().toLowerCase(),
+      phone: user.phone.trim().replace(/\D/g, ''),
+      document: {
+        number: user.document.trim().replace(/\D/g, ''),
+        type: documentType,
+      },
+    },
+    items: [
+      {
+        title: 'Depósito Mentira Verdadeira',
+        unitPrice: amount * 100,
+        quantity: 1,
+        tangible: true,
+      },
+    ],
+    pix: {
+      expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+    },
+    metadata: {
+      description: 'Depósito Mentira Verdadeira',
+    },
+  };
+
+  console.log('Payload enviado à API:', JSON.stringify(requestData, null, 2));
+
+  const secretKey = "sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR";
+  const encodedSecretKey = btoa(`${secretKey}:x`);
+
+  try {
+    const response = await axios.post(
+      'https://api.everpaygateway.com/v1/transactions',
+      requestData,
+      {
+        headers: {
+          Authorization: `Basic ${encodedSecretKey}`,
+          'Content-Type': 'application/json',
         },
-      },
-      items: [
-        {
-          title: 'Depósito Mentira Verdadeira', // Adicionando o campo 'title'
-          unitPrice: amount * 100, // 'unitPrice' deve ser o valor em centavos
-          quantity: 1, // 'quantity' deve ser um inteiro
-          tangible: true, // 'tangible' deve ser um valor booleano
-        },
-      ],
-      pix: {
-        expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // Formato ISO 8601
-      },
-      metadata: {
-        description: 'Depósito Mentira Verdadeira',
-      },
-    };
+      }
+    );
 
-    console.log('Payload enviado à API:', JSON.stringify(requestData, null, 2));
+    console.log('Response Data:', response.data);
 
-    // Codificar a chave secreta com base64 (sem a necessidade de btoa)
-    const secretKey = "sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR";
-    const encodedSecretKey = btoa(`${secretKey}:x`); // Adicionando ":x" conforme a documentação
-
-    try {
-      const response = await axios.post(
-        'https://api.everpaygateway.com/v1/transactions',
-        requestData,
-        {
-          headers: {
-            Authorization: `Basic ${encodedSecretKey}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      console.log('Response Data:', response.data);
+    // Verificar se o pagamento foi realizado com sucesso
+    if (response.data.paidAmount > 0) {
       setQrCode(response.data.pix.qrcode);
       setPixGenerated(true);
 
-      setTimeout(() => {
-        const bonus = calculateBonus(amount);
-        onCreditChange(user.credits + amount + bonus);
-        if (onDepositSuccess) {
-          onDepositSuccess();
-        }
-      }, 5000);
-    } catch (error: any) {
-      console.error('Erro ao gerar PIX:', error);
-      if (error.response) {
-        console.error('Response Data:', error.response.data);
-        const apiErrors = error.response.data?.message || [];
-        if (Array.isArray(apiErrors)) {
-          setError(`Erro(s): ${apiErrors.join(' | ')}`);
-        } else {
-          setError('Erro desconhecido ao processar a requisição.');
-        }
-      } else {
-        setError('Erro de rede ou configuração. Tente novamente.');
+      const bonus = calculateBonus(amount);
+      onCreditChange(user.credits + amount + bonus);
+      if (onDepositSuccess) {
+        onDepositSuccess();
       }
-    } finally {
-      setLoadingPix(false);
+    } else {
+      setError('Pagamento não foi processado. Tente novamente.');
     }
-  };
+  } catch (error: any) {
+    console.error('Erro ao gerar PIX:', error);
+    if (error.response) {
+      console.error('Response Data:', error.response.data);
+      const apiErrors = error.response.data?.message || [];
+      if (Array.isArray(apiErrors)) {
+        setError(`Erro(s): ${apiErrors.join(' | ')}`);
+      } else {
+        setError('Erro desconhecido ao processar a requisição.');
+      }
+    } else {
+      setError('Erro de rede ou configuração. Tente novamente.');
+    }
+  } finally {
+    setLoadingPix(false);
+  }
+};
 
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
