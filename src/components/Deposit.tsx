@@ -233,12 +233,14 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
           <p className="mt-4 text-gray-300">Escaneie o código ou copie o código abaixo para pagar.</p>
           <div className="mt-4">
             <pre
-              className="text-sm text-gray-200 bg-gray-800 p-4 rounded-lg cursor-pointer break-all"
+              className="text-sm text-gray-300 bg-gray-800 p-4 rounded-lg cursor-pointer"
               onClick={() => pixCode && copyToClipboard(pixCode)}
             >
               {pixCode}
             </pre>
-            {copySuccess && <p className="text-green-500 text-sm mt-2">Código copiado!</p>}
+            {copySuccess && (
+              <p className="text-green-400 text-sm mt-2">Código copiado!</p>
+            )}
           </div>
         </div>
       )}
