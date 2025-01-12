@@ -20,7 +20,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
     return amount * 0.5;
   };
 
-  const checkPaymentStatus = async (transactionId: string) => {
+  const checkPaymentStatus = async (transactionId: string, encodedSecretKey: string) => {
     try {
       const response = await axios.get(
         `https://api.everpaygateway.com/v1/transactions/${transactionId}`,
@@ -127,7 +127,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       } else {
         setError('Pagamento não foi processado. Tentando verificar status...');
         // Se o pagamento não foi confirmado, verifique o status
-        checkPaymentStatus(response.data.id);
+        checkPaymentStatus(response.data.id, encodedSecretKey);
       }
     } catch (error: any) {
       console.error('Erro ao gerar PIX:', error);
