@@ -16,6 +16,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   const [pixGenerated, setPixGenerated] = useState(false);
   const [error, setError] = useState<string | null>(null); // Adicionar estado de erro
   const [pixCode, setPixCode] = useState<string | null>(null); // Adicionar estado para o código Pix
+  const [copySuccess, setCopySuccess] = useState(false); // Estado para controle de cópia
 
   const calculateBonus = (amount: number) => {
     return amount * 0.5;
@@ -169,6 +170,14 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
 
   const bonus = calculateBonus(Number(depositAmount));
 
+  // Função para copiar o código Pix para a área de transferência
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000); // Mensagem de sucesso por 2 segundos
+    });
+  };
+
   return (
     <div className="glass-card p-6 rounded-xl max-w-md mx-auto">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
@@ -219,16 +228,24 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
 
       {pixGenerated && qrCode && (
         <div className="mt-6 text-center">
-          <h3 className="text-lg font-bold text-white mb-4">QR Code PIX</h3>
-          <img src={qrCode} alt="QR Code PIX" className="mx-auto mb-4" />
-          <p className="text-gray-300">Escaneie o QR code acima para realizar o pagamento.</p>
+          <h3 className="text-lg font-semibold text-white mb-2">Pix Gerado</h3>
+          <img src={qrCode} alt="QR Code Pix" className="w-64 h-64 mx-auto" />
+          <p className="mt-4 text-gray-300">Escaneie o código ou copie o código abaixo para pagar.</p>
+          <div className="mt-4">
+            <pre
+              className="text-sm text-gray-200 bg-gray-800 p-4 rounded-lg cursor-pointer break-all"
+              onClick={() => pixCode && copyToClipboard(pixCode)}
+            >
+              {pixCode}
+            </pre>
+            {copySuccess && <p className="text-green-500 text-sm mt-2">Código copiado!</p>}
+          </div>
         </div>
       )}
 
-      {pixCode && (
-        <div className="mt-6 text-center">
-          <h3 className="text-lg font-bold text-white mb-4">Ou copie o código para realizar o pagamento</h3>
-          <pre className="text-white bg-gray-800 p-4 rounded-lg break-all">{pixCode}</pre>
+      {!pixGenerated && error && !pixCode && (
+        <div className="text-center mt-4">
+          <p className="text-gray-300">Aguardando pagamento...</p>
         </div>
       )}
     </div>
