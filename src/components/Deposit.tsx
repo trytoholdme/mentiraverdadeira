@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Wallet } from 'lucide-react'; //importar o ícone wallet
+import { Wallet } from 'lucide-react'; // Importar o ícone wallet
 import type { User } from '../types';
 
 interface DepositProps {
-  onDepositSuccess?: () => void; // tornar opcional p evitar erro
-  user: User; //adicionar o usuariologado como prop
+  onDepositSuccess?: () => void; // Tornar opcional para evitar erro
+  user: User; // Adicionar o usuário logado como prop
   onCreditChange: (newCredits: number) => void;
 }
 
@@ -14,90 +14,92 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loadingPix, setLoadingPix] = useState(false);
   const [pixGenerated, setPixGenerated] = useState(false);
-  const [error, setError] = useState<string | null>(null); // adicionaestado de erro
+  const [error, setError] = useState<string | null>(null); // Adicionar estado de erro
 
   const calculateBonus = (amount: number) => {
     return amount * 0.5;
   };
 
   const generatePix = async (amount: number) => {
-  setLoadingPix(true);
-  setPixGenerated(false);
-  setError(null);
+    setLoadingPix(true);
+    setPixGenerated(false);
+    setError(null);
 
-  if (!user.name || !user.email || !user.phone || !user.document) {
-    setError('Dados do cliente estão incompletos. Verifique nome, e-mail, telefone e documento.');
-    setLoadingPix(false);
-    return;
-  }
-
-  const requestData = {
-  amount: amount * 100, // valor em centavos
-  payment_method: 'pix', // Deve ser exatamente 'pix'
-  customer: {
-    name: user.name.trim(),
-    email: user.email.trim().toLowerCase(),
-    phone: user.phone.trim().replace(/\D/g, ''),
-    document: user.document.trim().replace(/\D/g, ''),
-  },
-  items: [
-    {
-      name: 'Depósito Mentira Verdadeira',
-      value: amount * 100,
-      amount: 1,
-    },
-  ],
-  pix: {
-    expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-  },
-  metadata: {
-    description: 'Depósito Mentira Verdadeira',
-  },
-};
-
-  console.log('Payload enviado à API:', JSON.stringify(requestData, null, 2));
-
-  try {
-    const response = await axios.post(
-      'https://api.everpaygateway.com/v1/transactions',
-      requestData,
-      {
-        headers: {
-          Authorization: 'Basic ' + btoa('sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR'),
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    console.log('Response Data:', response.data);
-    setQrCode(response.data.pix.qrcode);
-    setPixGenerated(true);
-
-    setTimeout(() => {
-      const bonus = calculateBonus(amount);
-      onCreditChange(user.credits + amount + bonus);
-      if (onDepositSuccess) {
-        onDepositSuccess();
-      }
-    }, 5000);
-  } catch (error: any) {
-    console.error('Erro ao gerar PIX:', error);
-    if (error.response) {
-      console.error('Response Data:', error.response.data);
-      const apiErrors = error.response.data?.message || [];
-      if (Array.isArray(apiErrors)) {
-        setError(`Erro(s): ${apiErrors.join(' | ')}`);
-      } else {
-        setError('Erro desconhecido ao processar a requisição.');
-      }
-    } else {
-      setError('Erro de rede ou configuração. Tente novamente.');
+    // Verifica se os dados do cliente estão completos
+    if (!user.name || !user.email || !user.phone || !user.document) {
+      setError('Dados do cliente estão incompletos. Verifique nome, e-mail, telefone e documento.');
+      setLoadingPix(false);
+      return;
     }
-  } finally {
-    setLoadingPix(false);
-  }
-};
-  
+
+    const requestData = {
+      amount: amount * 100, // Valor em centavos
+      paymentMethod: 'pix', // Corrigido para 'paymentMethod'
+      customer: {
+        name: user.name.trim(),
+        email: user.email.trim().toLowerCase(),
+        phone: user.phone.trim().replace(/\D/g, ''),
+        document: user.document.trim().replace(/\D/g, ''),
+      },
+      items: [
+        {
+          title: 'Depósito Mentira Verdadeira', // Adicionando o campo 'title'
+          unitPrice: amount * 100, // 'unitPrice' deve ser o valor em centavos
+          quantity: 1, // 'quantity' deve ser um inteiro
+          tangible: true, // 'tangible' deve ser um valor booleano
+        },
+      ],
+      pix: {
+        expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // Formato ISO 8601
+      },
+      metadata: {
+        description: 'Depósito Mentira Verdadeira',
+      },
+    };
+
+    console.log('Payload enviado à API:', JSON.stringify(requestData, null, 2));
+
+    try {
+      const response = await axios.post(
+        'https://api.everpaygateway.com/v1/transactions',
+        requestData,
+        {
+          headers: {
+            Authorization: 'Basic ' + btoa('sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR'),
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log('Response Data:', response.data);
+      setQrCode(response.data.pix.qrcode);
+      setPixGenerated(true);
+
+      setTimeout(() => {
+        const bonus = calculateBonus(amount);
+        onCreditChange(user.credits + amount + bonus);
+        if (onDepositSuccess) {
+          onDepositSuccess();
+        }
+      }, 5000);
+    } catch (error: any) {
+      console.error('Erro ao gerar PIX:', error);
+      if (error.response) {
+        console.error('Response Data:', error.response.data);
+        const apiErrors = error.response.data?.message || [];
+        if (Array.isArray(apiErrors)) {
+          setError(`Erro(s): ${apiErrors.join(' | ')}`);
+        } else {
+          setError('Erro desconhecido ao processar a requisição.');
+        }
+      } else {
+        setError('Erro de rede ou configuração. Tente novamente.');
+      }
+    } finally {
+      setLoadingPix(false);
+    }
+  };
+
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amount = Number(depositAmount);
