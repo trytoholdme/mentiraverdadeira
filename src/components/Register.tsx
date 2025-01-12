@@ -40,7 +40,7 @@ export default function Register({ onBack, onSuccess }: RegisterProps) {
         password,
         phone,
         document,
-        credits: 0,
+        credits: 5, // Crédito inicial de R$ 5,00
         referralCode: Math.random().toString(36).substr(2, 9),
       };
 
