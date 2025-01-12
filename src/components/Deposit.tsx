@@ -40,7 +40,9 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         setQrCode(transactionData.pix.qrcode);
         setPixGenerated(true);
         const bonus = calculateBonus(Number(depositAmount));
-        onCreditChange(user.credits + Number(depositAmount) + bonus);
+        const newCredits = user.credits + Number(depositAmount) + bonus;
+        onCreditChange(newCredits);
+        updateUserCredits(user.email, newCredits);
         if (onDepositSuccess) {
           onDepositSuccess();
         }
@@ -126,7 +128,9 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         setQrCode(response.data.pix.qrcode);
         setPixGenerated(true);
         const bonus = calculateBonus(amount);
-        onCreditChange(user.credits + amount + bonus);
+        const newCredits = user.credits + amount + bonus;
+        onCreditChange(newCredits);
+        updateUserCredits(user.email, newCredits);
         if (onDepositSuccess) {
           onDepositSuccess();
         }
@@ -176,6 +180,18 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000); // Mensagem de sucesso por 2 segundos
     });
+  };
+
+  // Função para atualizar os créditos do usuário no localStorage
+  const updateUserCredits = (email: string, newCredits: number) => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const updatedUsers = users.map((u: User) => {
+      if (u.email === email) {
+        return { ...u, credits: newCredits };
+      }
+      return u;
+    });
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
   };
 
   return (
