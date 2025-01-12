@@ -47,7 +47,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       } else if (transactionData.status === 'waiting_payment') {
         console.log('Pagamento aguardando:', transactionData);
         setPixCode(transactionData.pix.qrcode); // Atualizando o pixCode
-        setError('Aguardando pagamento. Copie o código e faça o pagamento no seu banco.');
+        setError(null); // Limpar mensagem de erro
       } else {
         console.log('Pagamento ainda não processado:', transactionData);
         setError('Pagamento não processado. Tente novamente.');
@@ -132,7 +132,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         }
       } else if (response.data.status === 'waiting_payment') {
         setPixCode(response.data.pix.qrcode); // Salvar o código Pix gerado
-        setError('Aguardando pagamento. Copie o código e faça o pagamento no seu banco.');
+        setError(null); // Limpar mensagem de erro
         // Verificar o status após a geração do Pix
         checkPaymentStatus(response.data.id, encodedSecretKey);
       } else {
@@ -226,15 +226,15 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         </div>
       )}
 
-      {pixGenerated && qrCode && (
+      {pixCode && (
         <div className="mt-6 text-center">
           <h3 className="text-lg font-semibold text-white mb-2">Pix Gerado</h3>
-          <img src={qrCode} alt="QR Code Pix" className="w-64 h-64 mx-auto" />
+          {qrCode && <img src={qrCode} alt="QR Code Pix" className="w-64 h-64 mx-auto" />}
           <p className="mt-4 text-gray-300">Escaneie o código ou copie o código abaixo para pagar.</p>
           <div className="mt-4">
             <pre
               className="text-sm text-gray-300 bg-gray-800 p-4 rounded-lg cursor-pointer"
-              onClick={() => pixCode && copyToClipboard(pixCode)}
+              onClick={() => copyToClipboard(pixCode)}
             >
               {pixCode}
             </pre>
@@ -242,12 +242,6 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
               <p className="text-green-400 text-sm mt-2">Código copiado!</p>
             )}
           </div>
-        </div>
-      )}
-
-      {!pixGenerated && error && !pixCode && (
-        <div className="text-center mt-4">
-          <p className="text-gray-300">Aguardando pagamento...</p>
         </div>
       )}
     </div>
