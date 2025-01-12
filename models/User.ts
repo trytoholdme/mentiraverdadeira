@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   credits: { type: Number, default: 0 },
   referralCode: { type: String, unique: true, default: () => Math.random().toString(36).substr(2, 9) },
+  isAdmin: { type: Boolean, default: false },
 });
 
 export const User = mongoose.model('User', userSchema);
