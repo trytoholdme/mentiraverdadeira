@@ -75,6 +75,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       console.error('Erro ao gerar PIX:', error);
       if (error.response) {
         console.error('Response Data:', error.response.data); // Adicionar log para depuração
+        setError(error.response.data.message || 'Erro ao gerar PIX. Tente novamente.');
       }
       setError('Erro ao gerar PIX. Tente novamente.'); // Definir mensagem de erro
     } finally {
