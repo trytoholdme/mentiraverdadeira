@@ -31,10 +31,10 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       amount: amount * 100, // Valor em centavos
       payment_method: 'pix',
       customer: {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        document: user.document,
+        name: user.name || 'Nome Não Informado',
+        email: user.email || 'email@dominio.com',
+        phone: user.phone || '00000000000',
+        document: user.document || '00000000000', // Verifique se os dados do usuário estão corretos
       },
       items: [
         {
@@ -44,20 +44,21 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         },
       ],
       pix: {
-        expiration_date: new Date(new Date().getTime() + 30 * 60 * 1000).toISOString(),
+        expiration_date: new Date(new Date().getTime() + 30 * 60 * 1000).toISOString(), // Formato ISO completo
       },
       metadata: 'Depósito Mentira Verdadeira',
     };
 
+    console.log('Request Data:', requestData); // Adicionar log para depuração
+
     try {
-      // Envio da requisição para a API
       const response = await axios.post(
         'https://api.everpaygateway.com/v1/transactions',
         requestData,
         {
           headers: {
             authorization: `Basic ${btoa(`${SECRET_KEY}:x`)}`,
-            'Content-Type': 'application/json', // Garantir que os dados sejam enviados no formato JSON
+            'Content-Type': 'application/json',
           },
         }
       );
