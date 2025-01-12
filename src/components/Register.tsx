@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
-import { createUser } from '../lib/auth';
 import type { User } from '../types';
-import axios from 'axios';
 
 interface RegisterProps {
   onBack: () => void;
@@ -27,37 +25,43 @@ export default function Register({ onBack, onSuccess }: RegisterProps) {
     setLoading(true);
 
     try {
-      const user = await createUser(email, password, inviteCode, {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const existingUser = users.find((user: User) => user.email === email);
+
+      if (existingUser) {
+        setError('Email já registrado. Tente novamente.');
+        setLoading(false);
+        return;
+      }
+
+      const newUser: User = {
         name,
+        email,
+        password,
         phone,
         document,
-      });
-      if (user) {
-        onSuccess(user);
-      } else {
-        setError('Erro ao criar conta. Tente novamente.');
+        credits: 0,
+        referralCode: Math.random().toString(36).substr(2, 9),
+      };
+
+      if (referralCode) {
+        const referrer = users.find((user: User) => user.referralCode === referralCode);
+        if (referrer) {
+          referrer.credits += 8;
+          newUser.credits += 8;
+        }
       }
+
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+
+      setSuccess('Registro bem-sucedido! Você pode fazer login agora.');
+      setError(null);
+      onSuccess(newUser);
     } catch (err) {
       setError('Erro ao criar conta. Tente novamente.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('/api/register', {
-        name,
-        email,
-        password,
-        referralCode,
-      });
-      setSuccess('Registro bem-sucedido! Você pode fazer login agora.');
-      setError(null);
-    } catch (error) {
-      setError('Erro ao registrar. Tente novamente.');
-      setSuccess(null);
     }
   };
 
@@ -209,8 +213,4 @@ export default function Register({ onBack, onSuccess }: RegisterProps) {
           >
             {loading ? 'Criando Conta...' : 'Criar Conta e Ganhar R$ 5,00'}
           </button>
-        </form>
-      </div>
-    </div>
-  );
-}
+ 
