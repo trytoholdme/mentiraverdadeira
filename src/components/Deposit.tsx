@@ -65,7 +65,8 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         requestData,
         {
           headers: {
-            Authorization: 'Basic ' + btoa('sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR'),
+            // Passando o token diretamente no header sem codificação base64
+            Authorization: 'Bearer sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR',
             'Content-Type': 'application/json',
           },
         }
