@@ -9,7 +9,8 @@ interface DepositProps {
   onCreditChange: (newCredits: number) => void;
 }
 
-const SECRET_KEY = "sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR"; // Sua chave secreta
+const PUBLIC_KEY = 'ixnvlr_u2mw5j335zq330xq'; // Sua chave pública
+const SECRET_KEY = 'g1wr6a4gi0hiip452nj7srkbvj41xqvvoqgszju02s21u6rojxrft46j8hxd1w1s'; // Sua chave privada
 
 export default function Deposit({ onDepositSuccess, user, onCreditChange }: DepositProps) {
   const [depositAmount, setDepositAmount] = useState('20');
@@ -53,11 +54,12 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
 
     try {
       const response = await axios.post(
-        'https://api.everpaygateway.com/v1/transactions',
+        'https://app.blackpay.io/api/v1/transactions',
         requestData,
         {
           headers: {
-            authorization: `Basic ${btoa(`${SECRET_KEY}:x`)}`,
+            'x-public-key': PUBLIC_KEY,
+            'x-secret-key': SECRET_KEY,
             'Content-Type': 'application/json',
           },
         }
