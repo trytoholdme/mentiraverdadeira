@@ -100,4 +100,7 @@ export default function Login({ onBack, onSuccess }: LoginProps) {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
- 
+      </div>
+    </div>
+  );
+}
