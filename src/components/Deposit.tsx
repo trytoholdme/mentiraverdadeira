@@ -178,13 +178,6 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
     });
   };
 
-  // UseEffect para verificar mudanças no estado pixCode e atualizar a interface
-  useEffect(() => {
-    if (pixCode) {
-      console.log('Código Pix gerado:', pixCode);
-    }
-  }, [pixCode]);
-
   return (
     <div className="glass-card p-6 rounded-xl max-w-md mx-auto">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
