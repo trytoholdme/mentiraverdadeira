@@ -23,9 +23,8 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   const generatePix = async (amount: number) => {
   setLoadingPix(true);
   setPixGenerated(false);
-  setError(null); // Resetar erro
+  setError(null);
 
-  // Validar os dados do cliente antes de enviar
   if (!user.name || !user.email || !user.phone || !user.document) {
     setError('Dados do cliente estão incompletos. Verifique nome, e-mail, telefone e documento.');
     setLoadingPix(false);
@@ -33,28 +32,30 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   }
 
   const requestData = {
-    amount: amount * 100, // Valor em centavos
+    amount: amount * 100,
     payment_method: 'pix',
     customer: {
-      name: user.name.trim(), // Remover espaços extras
-      email: user.email.trim(),
-      phone: user.phone.trim(), // Certifique-se do formato exigido pela API (e.g., DDD + número)
-      document: user.document.trim(), // CPF ou CNPJ, no formato correto
+      name: user.name.trim(),
+      email: user.email.trim().toLowerCase(),
+      phone: user.phone.trim().replace(/\D/g, ''),
+      document: user.document.trim().replace(/\D/g, ''),
     },
     items: [
       {
         name: 'Depósito Mentira Verdadeira',
-        value: amount * 100, // Valor em centavos
-        amount: 1, // Quantidade de itens
+        value: amount * 100,
+        amount: 1,
       },
     ],
     pix: {
-      expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // Data de expiração no formato ISO
+      expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
     },
-    metadata: { description: 'Depósito Mentira Verdadeira' },
+    metadata: {
+      description: 'Depósito Mentira Verdadeira',
+    },
   };
 
-  console.log('Request Data:', requestData); // Log para depuração
+  console.log('Payload enviado à API:', JSON.stringify(requestData, null, 2));
 
   try {
     const response = await axios.post(
@@ -63,16 +64,15 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       {
         headers: {
           Authorization: 'Basic ' + btoa('sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR:x'),
-          'Content-Type': 'application/json', // Certifique-se de que o cabeçalho seja enviado
+          'Content-Type': 'application/json',
         },
       }
     );
 
-    console.log('Response Data:', response.data); // Log para depuração
-    setQrCode(response.data.pix.qrcode); // Atualiza o QR Code retornado pela API
+    console.log('Response Data:', response.data);
+    setQrCode(response.data.pix.qrcode);
     setPixGenerated(true);
 
-    // Simula a confirmação do pagamento após 5 segundos
     setTimeout(() => {
       const bonus = calculateBonus(amount);
       onCreditChange(user.credits + amount + bonus);
@@ -83,15 +83,21 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   } catch (error: any) {
     console.error('Erro ao gerar PIX:', error);
     if (error.response) {
-      console.error('Response Data:', error.response.data); // Log detalhado do erro da API
+      console.error('Response Data:', error.response.data);
+      const apiErrors = error.response.data?.message || [];
+      if (Array.isArray(apiErrors)) {
+        setError(`Erro(s): ${apiErrors.join(' | ')}`);
+      } else {
+        setError('Erro desconhecido ao processar a requisição.');
+      }
+    } else {
+      setError('Erro de rede ou configuração. Tente novamente.');
     }
-    setError('Erro ao gerar PIX. Tente novamente.'); // Define mensagem de erro
   } finally {
     setLoadingPix(false);
   }
 };
-
-
+  
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amount = Number(depositAmount);
