@@ -59,14 +59,17 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
 
     console.log('Payload enviado à API:', JSON.stringify(requestData, null, 2));
 
+    // Codificar a chave secreta com base64 (sem a necessidade de btoa)
+    const secretKey = "sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR";
+    const encodedSecretKey = btoa(`${secretKey}:x`); // Adicionando ":x" conforme a documentação
+
     try {
       const response = await axios.post(
         'https://api.everpaygateway.com/v1/transactions',
         requestData,
         {
           headers: {
-            // Passando o token diretamente no header sem codificação base64
-            Authorization: 'Bearer sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR',
+            Authorization: `Basic ${encodedSecretKey}`,
             'Content-Type': 'application/json',
           },
         }
