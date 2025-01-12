@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { ArrowLeft, LogIn } from 'lucide-react';
 import type { User } from '../types';
 
@@ -20,14 +19,18 @@ export default function Login({ onBack, onSuccess }: LoginProps) {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/login', {
-        email,
-        password,
-      });
-      // Salvar token de autenticação ou redirecionar o usuário
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const user = users.find((user: User) => user.email === email && user.password === password);
+
+      if (!user) {
+        setError('Email ou senha inválidos. Tente novamente.');
+        setLoading(false);
+        return;
+      }
+
       setError(null);
-      onSuccess(response.data.user);
-    } catch (error) {
+      onSuccess(user);
+    } catch (err) {
       setError('Erro ao fazer login. Tente novamente.');
     } finally {
       setLoading(false);
@@ -97,7 +100,4 @@ export default function Login({ onBack, onSuccess }: LoginProps) {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
-      </div>
-    </div>
-  );
-}
+ 
