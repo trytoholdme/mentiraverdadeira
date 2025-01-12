@@ -28,6 +28,7 @@ export default function Login({ onBack, onSuccess }: LoginProps) {
         return;
       }
 
+      localStorage.setItem('currentUser', JSON.stringify(user));
       setError(null);
       onSuccess(user);
     } catch (err) {
