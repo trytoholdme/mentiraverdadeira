@@ -35,7 +35,7 @@ const hardQuestionBank = [
       { id: 'B', text: "0.2319" },
       { id: 'C', text: "0.1427" }
     ],
-    correctAnswer: 'A'
+    correctAnswer: 'D'
   },
   {
     description: "Qual é a solução da equação de Schrödinger para um potencial de poço infinito tridimensional?",
@@ -44,7 +44,7 @@ const hardQuestionBank = [
       { id: 'B', text: "Ψ(x,y,z) = B cos(kx x) cos(ky y) cos(kz z)" },
       { id: 'C', text: "Ψ(x,y,z) = C exp(-kx x) exp(-ky y) exp(-kz z)" }
     ],
-    correctAnswer: 'A'
+    correctAnswer: 'D'
   },
   {
     description: "Qual é a função de onda do estado fundamental de um oscilador harmônico quântico?",
@@ -53,8 +53,106 @@ const hardQuestionBank = [
       { id: 'B', text: "Ψ(x) = (mω/πħ)^(1/4) exp(-mωx²/ħ)" },
       { id: 'C', text: "Ψ(x) = (mω/πħ)^(1/2) exp(-mωx²/2ħ)" }
     ],
-    correctAnswer: 'A'
-  }
+    correctAnswer: 'D'
+  },
+  
+  {
+    description: "Qual é a solução da equação de Schrödinger para um potencial de poço infinito tridimensional?",
+    options: [
+      { id: 'A', text: "Ψ(x,y,z) = A sin(kx x) sin(ky y) sin(kz z)" },
+      { id: 'B', text: "Ψ(x,y,z) = B cos(kx x) cos(ky y) cos(kz z)" },
+      { id: 'C', text: "Ψ(x,y,z) = C exp(-kx x) exp(-ky y) exp(-kz z)" }
+    ],
+    correctAnswer: 'D'
+  },
+  
+ {
+  "description": "Qual é a função de onda associada a um estado excitado no potencial de poço infinito unidimensional?",
+  "options": [
+    { "id": "A", "text": "Ψ(x) = A sin(kx) exp(-αx)" },
+    { "id": "B", "text": "Ψ(x) = A cos(kx) exp(-βx)" },
+    { "id": "C", "text": "Ψ(x) = A sin(kx) + B cos(kx)" }
+  ],
+  "correctAnswer": "D"
+},
+
+ {
+  "description": "Qual é a solução da equação de campo de Einstein para um espaço-tempo esférico simétrico, sem carga elétrica ou massa?",
+  "options": [
+    { "id": "A", "text": "Métrica de Schwarzschild" },
+    { "id": "B", "text": "Métrica de Kerr" },
+    { "id": "C", "text": "Métrica de Friedmann-Lemaître" }
+  ],
+  "correctAnswer": "d"
+},
+
+{
+  "description": "Na teoria das cordas, qual é o número mínimo de dimensões necessárias para a consistência da teoria?",
+  "options": [
+    { "id": "A", "text": "10 dimensões" },
+    { "id": "B", "text": "11 dimensões" },
+    { "id": "C", "text": "26 dimensões" }
+  ],
+  "correctAnswer": "D"
+},
+
+{
+  "description": "No contexto da mecânica estatística, qual é a expressão para a função de partição no modelo de Ising em duas dimensões?",
+  "options": [
+    { "id": "A", "text": "Z = sum(exp(-βE)) para todos os estados possíveis" },
+    { "id": "B", "text": "Z = sum(exp(-Jβ)) para todas as orientações de spins" },
+    { "id": "C", "text": "Z = exp(-βJsum(s1s2))" }
+  ],
+  "correctAnswer": "D"
+},
+
+{
+  "description": "Qual é a solução da equação de Friedmann para um universo fechado, sem matéria escura, com constante cosmológica λ positiva?",
+  "options": [
+    { "id": "A", "text": "R(t) = R₀ exp(Ht)" },
+    { "id": "B", "text": "R(t) = R₀ cos(ωt)" },
+    { "id": "C", "text": "R(t) = R₀ (t₀ - t)^(1/2)" }
+  ],
+  "correctAnswer": "D"
+},
+
+{
+  "description": "Qual é a expressão para a entropia de um sistema de partículas no limite de alta temperatura, usando a distribuição de Boltzmann?",
+  "options": [
+    { "id": "A", "text": "S = k_B ln(Ω)" },
+    { "id": "B", "text": "S = -k_B sum(p_i ln p_i)" },
+    { "id": "C", "text": "S = k_B ln(e^(-βH))" }
+  ],
+  "correctAnswer": "D"
+},
+
+{
+  "description": "Qual é a expressão para a entropia de um sistema de partículas no limite de alta temperatura, usando a distribuição de Boltzmann?",
+  "options": [
+    { "id": "A", "text": "S = k_B ln(Ω)" },
+    { "id": "B", "text": "S = -k_B sum(p_i ln p_i)" },
+    { "id": "C", "text": "S = k_B ln(e^(-βH))" }
+  ],
+  "correctAnswer": "D"
+}
+
+{
+  "description": "Qual é a razão para a existência da barreira de Coulomb na fusão nuclear?",
+  "options": [
+    { "id": "A", "text": "Devido à repulsão eletrostática entre os núcleos" },
+    { "id": "B", "text": "Devido à interação nuclear forte" },
+    { "id": "C", "text": "Devido à interação gravitacional entre os núcleos" }
+  ],
+  "correctAnswer": "D"
+},
+
+
+
+
+
+
+
+  
 ];
 
 interface GameProps {
