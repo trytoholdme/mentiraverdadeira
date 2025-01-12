@@ -32,6 +32,10 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       return;
     }
 
+    // Determina o tipo do documento (CPF ou CNPJ)
+    const isCpf = user.document.length === 11; // CPF tem 11 caracteres
+    const documentType = isCpf ? 'cpf' : 'cnpj'; // Considera CPF ou CNPJ
+
     const requestData = {
       amount: amount * 100, // Valor em centavos
       paymentMethod: 'pix', // Corrigido para 'paymentMethod'
@@ -39,7 +43,10 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         name: user.name.trim(),
         email: user.email.trim().toLowerCase(),
         phone: user.phone.trim().replace(/\D/g, ''),
-        document: user.document.trim().replace(/\D/g, ''),
+        document: {
+          number: user.document.trim().replace(/\D/g, ''),
+          type: documentType, // Define o tipo de documento (cpf ou cnpj)
+        },
       },
       items: [
         {
