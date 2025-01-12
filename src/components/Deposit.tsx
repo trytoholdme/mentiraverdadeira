@@ -21,66 +21,76 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   };
 
   const generatePix = async (amount: number) => {
-    setLoadingPix(true);
-    setPixGenerated(false);
-    setError(null); // rsetar erro
+  setLoadingPix(true);
+  setPixGenerated(false);
+  setError(null); // Resetar erro
 
-    const requestData = {
-      amount: amount * 100, // valor em centav
-      payment_method: 'pix',
-      customer: {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        document: user.document,
+  // Validar os dados do cliente antes de enviar
+  if (!user.name || !user.email || !user.phone || !user.document) {
+    setError('Dados do cliente estão incompletos. Verifique nome, e-mail, telefone e documento.');
+    setLoadingPix(false);
+    return;
+  }
+
+  const requestData = {
+    amount: amount * 100, // Valor em centavos
+    payment_method: 'pix',
+    customer: {
+      name: user.name.trim(), // Remover espaços extras
+      email: user.email.trim(),
+      phone: user.phone.trim(), // Certifique-se do formato exigido pela API (e.g., DDD + número)
+      document: user.document.trim(), // CPF ou CNPJ, no formato correto
+    },
+    items: [
+      {
+        name: 'Depósito Mentira Verdadeira',
+        value: amount * 100, // Valor em centavos
+        amount: 1, // Quantidade de itens
       },
-      items: [
-        {
-          name: 'Depósito Mentira Verdadeira',
-          value: amount * 100,
-          amount: 1,
-        },
-      ],
-      pix: {
-        expiration_date: new Date(new Date().getTime() + 30 * 60 * 1000).toISOString(), // formato iso completo
-      },
-      metadata: 'Depósito Mentira Verdadeira',
-    };
-
-    console.log('Request Data:', requestData); // adicionar log para depuracao
-
-    try {
-      const response = await axios.post(
-        'https://api.everpaygateway.com/v1/transactions',
-        requestData,
-        {
-          headers: {
-            authorization: 'Basic ' + btoa('sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR:x'),
-          },
-        }
-      );
-      console.log('Response Data:', response.data); // adicionar log para depuracao
-      setQrCode(response.data.pix.qrcode);
-      setPixGenerated(true);
-
-      // simular a confirmacao de pagamento apos 5s
-      setTimeout(() => {
-        const bonus = calculateBonus(amount);
-        onCreditChange(user.credits + amount + bonus);
-        if (onDepositSuccess) {
-          onDepositSuccess();
-        }
-      }, 5000);
-    } catch (error) {
-      console.error('Erro ao gerar PIX:', error);
-      if (error.response) {
-        console.error('Response Data:', error.response.data); // adicionar log para depuracao
-      }
-      setError('Erro ao gerar PIX. Tente novamente.'); // definir mensagem de erro
-    } finally {
-      setLoadingPix(false);
-    }
+    ],
+    pix: {
+      expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // Data de expiração no formato ISO
+    },
+    metadata: { description: 'Depósito Mentira Verdadeira' },
   };
+
+  console.log('Request Data:', requestData); // Log para depuração
+
+  try {
+    const response = await axios.post(
+      'https://api.everpaygateway.com/v1/transactions',
+      requestData,
+      {
+        headers: {
+          Authorization: 'Basic ' + btoa('sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR:x'),
+          'Content-Type': 'application/json', // Certifique-se de que o cabeçalho seja enviado
+        },
+      }
+    );
+
+    console.log('Response Data:', response.data); // Log para depuração
+    setQrCode(response.data.pix.qrcode); // Atualiza o QR Code retornado pela API
+    setPixGenerated(true);
+
+    // Simula a confirmação do pagamento após 5 segundos
+    setTimeout(() => {
+      const bonus = calculateBonus(amount);
+      onCreditChange(user.credits + amount + bonus);
+      if (onDepositSuccess) {
+        onDepositSuccess();
+      }
+    }, 5000);
+  } catch (error: any) {
+    console.error('Erro ao gerar PIX:', error);
+    if (error.response) {
+      console.error('Response Data:', error.response.data); // Log detalhado do erro da API
+    }
+    setError('Erro ao gerar PIX. Tente novamente.'); // Define mensagem de erro
+  } finally {
+    setLoadingPix(false);
+  }
+};
+
 
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
