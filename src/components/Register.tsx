@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { createUser } from '../lib/auth';
 import type { User } from '../types';
+import axios from 'axios';
 
 interface RegisterProps {
   onBack: () => void;
@@ -17,6 +18,8 @@ export default function Register({ onBack, onSuccess }: RegisterProps) {
   const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +44,23 @@ export default function Register({ onBack, onSuccess }: RegisterProps) {
     }
   };
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/api/register', {
+        name,
+        email,
+        password,
+        referralCode,
+      });
+      setSuccess('Registro bem-sucedido! Você pode fazer login agora.');
+      setError(null);
+    } catch (error) {
+      setError('Erro ao registrar. Tente novamente.');
+      setSuccess(null);
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto">
       <button
@@ -60,6 +80,12 @@ export default function Register({ onBack, onSuccess }: RegisterProps) {
         {error && (
           <div className="bg-pink-500/10 border border-pink-500 text-pink-500 p-3 rounded-lg mb-4">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-500/10 border border-green-500 text-green-500 p-3 rounded-lg mb-4">
+            {success}
           </div>
         )}
 
@@ -157,6 +183,21 @@ export default function Register({ onBack, onSuccess }: RegisterProps) {
               className="w-full p-3 bg-gray-900/50 border border-green-500/20 rounded-lg focus:outline-none focus:border-green-500 text-white"
               placeholder="Código de Convite"
               maxLength={6}
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-300 mb-2" htmlFor="referralCode">
+              Código de Indicação (opcional)
+            </label>
+            <input
+              type="text"
+              id="referralCode"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
+              className="w-full p-3 bg-gray-900/50 border border-green-500/20 rounded-lg focus:outline-none focus:border-green-500 text-white"
+              placeholder="Código de Indicação"
               disabled={loading}
             />
           </div>
