@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Wallet } from 'lucide-react'; // Importar o ícone Wallet
+import { Wallet } from 'lucide-react'; //importar o ícone wallet
 import type { User } from '../types';
 
 interface DepositProps {
-  onDepositSuccess?: () => void; // Tornar opcional para evitar erro
-  user: User; // Adicionar o usuário logado como prop
+  onDepositSuccess?: () => void; // tornar opcional p evitar erro
+  user: User; //adicionar o usuariologado como prop
   onCreditChange: (newCredits: number) => void;
 }
 
@@ -14,7 +14,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loadingPix, setLoadingPix] = useState(false);
   const [pixGenerated, setPixGenerated] = useState(false);
-  const [error, setError] = useState<string | null>(null); // Adicionar estado de erro
+  const [error, setError] = useState<string | null>(null); // adicionaestado de erro
 
   const calculateBonus = (amount: number) => {
     return amount * 0.5;
@@ -23,10 +23,10 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   const generatePix = async (amount: number) => {
     setLoadingPix(true);
     setPixGenerated(false);
-    setError(null); // Resetar erro
+    setError(null); // rsetar erro
 
     const requestData = {
-      amount: amount * 100, // Valor em centavos
+      amount: amount * 100, // valor em centav
       payment_method: 'pix',
       customer: {
         name: user.name,
@@ -42,12 +42,12 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         },
       ],
       pix: {
-        expiration_date: new Date(new Date().getTime() + 30 * 60 * 1000).toISOString(), // Formato ISO completo
+        expiration_date: new Date(new Date().getTime() + 30 * 60 * 1000).toISOString(), // formato iso completo
       },
       metadata: 'Depósito Mentira Verdadeira',
     };
 
-    console.log('Request Data:', requestData); // Adicionar log para depuração
+    console.log('Request Data:', requestData); // adicionar log para depuracao
 
     try {
       const response = await axios.post(
@@ -59,11 +59,11 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
           },
         }
       );
-      console.log('Response Data:', response.data); // Adicionar log para depuração
+      console.log('Response Data:', response.data); // adicionar log para depuracao
       setQrCode(response.data.pix.qrcode);
       setPixGenerated(true);
 
-      // Simular a confirmação de pagamento após 5 segundos
+      // simular a confirmacao de pagamento apos 5s
       setTimeout(() => {
         const bonus = calculateBonus(amount);
         onCreditChange(user.credits + amount + bonus);
@@ -74,9 +74,9 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
     } catch (error) {
       console.error('Erro ao gerar PIX:', error);
       if (error.response) {
-        console.error('Response Data:', error.response.data); // adiciona log para depuracao
+        console.error('Response Data:', error.response.data); // adicionar log para depuracao
       }
-      setError('Erro ao gerar PIX. Tente novamente.'); // define mensagem d erro
+      setError('Erro ao gerar PIX. Tente novamente.'); // definir mensagem de erro
     } finally {
       setLoadingPix(false);
     }
