@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Wallet } from 'lucide-react'; // Importar o ícone wallet
 import type { User } from '../types';
@@ -177,6 +177,13 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       setTimeout(() => setCopySuccess(false), 2000); // Mensagem de sucesso por 2 segundos
     });
   };
+
+  // UseEffect para verificar mudanças no estado pixCode e atualizar a interface
+  useEffect(() => {
+    if (pixCode) {
+      console.log('Código Pix gerado:', pixCode);
+    }
+  }, [pixCode]);
 
   return (
     <div className="glass-card p-6 rounded-xl max-w-md mx-auto">
