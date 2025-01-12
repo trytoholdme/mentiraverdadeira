@@ -144,15 +144,8 @@ const hardQuestionBank = [
     { "id": "C", "text": "Devido à interação gravitacional entre os núcleos" }
   ],
   "correctAnswer": "D"
-},
-
-
-
-
-
-
-
-  
+}
+     
 ];
 
 interface GameProps {
