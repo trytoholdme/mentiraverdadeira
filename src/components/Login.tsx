@@ -28,9 +28,11 @@ export default function Login({ onBack, onSuccess }: LoginProps) {
         return;
       }
 
-      localStorage.setItem('currentUser', JSON.stringify(user));
+      // Load user balance
+      const currentUser = { ...user, credits: user.credits };
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
       setError(null);
-      onSuccess(user);
+      onSuccess(currentUser);
     } catch (err) {
       setError('Erro ao fazer login. Tente novamente.');
     } finally {
