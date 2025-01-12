@@ -46,7 +46,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         }
       } else if (transactionData.status === 'waiting_payment') {
         console.log('Pagamento aguardando:', transactionData);
-        setPixCode(transactionData.pix.qrcode); // Exibir o código Pix gerado
+        setPixCode(transactionData.pix.qrcode); // Atualizando o pixCode
         setError('Aguardando pagamento. Copie o código e faça o pagamento no seu banco.');
       } else {
         console.log('Pagamento ainda não processado:', transactionData);
