@@ -5,9 +5,10 @@ import type { User } from '../types';
 interface LoginProps {
   onBack: () => void;
   onSuccess: (user: User) => void;
+  onAdminSuccess: () => void;
 }
 
-export default function Login({ onBack, onSuccess }: LoginProps) {
+export default function Login({ onBack, onSuccess, onAdminSuccess }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +20,13 @@ export default function Login({ onBack, onSuccess }: LoginProps) {
     setLoading(true);
 
     try {
+      if (email === 'admin@gmail.com' && password === 'delas7') {
+        setError(null);
+        onAdminSuccess();
+        setLoading(false);
+        return;
+      }
+
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const user = users.find((user: User) => user.email === email && user.password === password);
 
