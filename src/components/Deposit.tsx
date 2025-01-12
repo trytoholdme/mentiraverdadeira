@@ -32,28 +32,28 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
   }
 
   const requestData = {
-    amount: amount * 100,
-    payment_method: 'pix',
-    customer: {
-      name: user.name.trim(),
-      email: user.email.trim().toLowerCase(),
-      phone: user.phone.trim().replace(/\D/g, ''),
-      document: user.document.trim().replace(/\D/g, ''),
+  amount: amount * 100, // valor em centavos
+  payment_method: 'pix', // Deve ser exatamente 'pix'
+  customer: {
+    name: user.name.trim(),
+    email: user.email.trim().toLowerCase(),
+    phone: user.phone.trim().replace(/\D/g, ''),
+    document: user.document.trim().replace(/\D/g, ''),
+  },
+  items: [
+    {
+      name: 'Depósito Mentira Verdadeira',
+      value: amount * 100,
+      amount: 1,
     },
-    items: [
-      {
-        name: 'Depósito Mentira Verdadeira',
-        value: amount * 100,
-        amount: 1,
-      },
-    ],
-    pix: {
-      expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-    },
-    metadata: {
-      description: 'Depósito Mentira Verdadeira',
-    },
-  };
+  ],
+  pix: {
+    expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+  },
+  metadata: {
+    description: 'Depósito Mentira Verdadeira',
+  },
+};
 
   console.log('Payload enviado à API:', JSON.stringify(requestData, null, 2));
 
@@ -63,7 +63,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       requestData,
       {
         headers: {
-          Authorization: 'Basic ' + btoa('sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR:x'),
+          Authorization: 'Basic ' + btoa('sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR'),
           'Content-Type': 'application/json',
         },
       }
