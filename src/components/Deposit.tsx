@@ -45,7 +45,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
         }
       } else if (transactionData.status === 'waiting_payment') {
         console.log('Pagamento aguardando:', transactionData);
-        setPixUrl(transactionData.pix.receiptUrl); // Mostrar a URL para copiar
+        setPixUrl(transactionData.secureUrl); // Usar secureUrl aqui
         setError('Aguardando pagamento. Copie a URL e faça o pagamento no seu banco.');
       } else {
         console.log('Pagamento ainda não processado:', transactionData);
@@ -130,7 +130,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
           onDepositSuccess();
         }
       } else if (response.data.status === 'waiting_payment') {
-        setPixUrl(response.data.pix.receiptUrl); // URL do pagamento
+        setPixUrl(response.data.secureUrl); // Usar secureUrl para copiar e colar
         setError('Aguardando pagamento. Copie a URL e faça o pagamento no seu banco.');
         // Verificar o status após a geração do Pix
         checkPaymentStatus(response.data.id, encodedSecretKey);
@@ -228,7 +228,9 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       {pixUrl && (
         <div className="mt-6 text-center">
           <h3 className="text-lg font-bold text-white mb-4">Ou copie e cole no seu banco</h3>
-          <a href={pixUrl} className="text-blue-400">{pixUrl}</a>
+          <a href={pixUrl} className="text-blue-500" target="_blank" rel="noopener noreferrer">
+            {pixUrl}
+          </a>
         </div>
       )}
     </div>
