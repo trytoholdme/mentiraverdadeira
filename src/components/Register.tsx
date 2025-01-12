@@ -176,22 +176,6 @@ export default function Register({ onBack, onSuccess }: RegisterProps) {
           </div>
 
           <div>
-            <label className="block text-gray-300 mb-2" htmlFor="inviteCode">
-              Código de Convite (opcional)
-            </label>
-            <input
-              type="text"
-              id="inviteCode"
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-              className="w-full p-3 bg-gray-900/50 border border-green-500/20 rounded-lg focus:outline-none focus:border-green-500 text-white"
-              placeholder="Código de Convite"
-              maxLength={6}
-              disabled={loading}
-            />
-          </div>
-
-          <div>
             <label className="block text-gray-300 mb-2" htmlFor="referralCode">
               Código de Indicação (opcional)
             </label>
