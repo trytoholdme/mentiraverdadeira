@@ -20,99 +20,132 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
     return amount * 0.5;
   };
 
-  const generatePix = async (amount: number) => {
-  setLoadingPix(true);
-  setPixGenerated(false);
-  setError(null);
+  const checkPaymentStatus = async (transactionId: string) => {
+    try {
+      const response = await axios.get(
+        `https://api.everpaygateway.com/v1/transactions/${transactionId}`,
+        {
+          headers: {
+            Authorization: `Basic ${encodedSecretKey}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-  // Verifica se os dados do cliente estão completos
-  if (!user.name || !user.email || !user.phone || !user.document) {
-    setError('Dados do cliente estão incompletos. Verifique nome, e-mail, telefone e documento.');
-    setLoadingPix(false);
-    return;
-  }
-
-  // Determina o tipo do documento (CPF ou CNPJ)
-  const isCpf = user.document.length === 11; // CPF tem 11 caracteres
-  const documentType = isCpf ? 'cpf' : 'cnpj'; // Considera CPF ou CNPJ
-
-  const requestData = {
-    amount: amount * 100, // Valor em centavos
-    paymentMethod: 'pix',
-    customer: {
-      name: user.name.trim(),
-      email: user.email.trim().toLowerCase(),
-      phone: user.phone.trim().replace(/\D/g, ''),
-      document: {
-        number: user.document.trim().replace(/\D/g, ''),
-        type: documentType,
-      },
-    },
-    items: [
-      {
-        title: 'Depósito Mentira Verdadeira',
-        unitPrice: amount * 100,
-        quantity: 1,
-        tangible: true,
-      },
-    ],
-    pix: {
-      expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-    },
-    metadata: {
-      description: 'Depósito Mentira Verdadeira',
-    },
+      const transactionData = response.data;
+      if (transactionData.paidAmount > 0) {
+        console.log('Pagamento confirmado:', transactionData);
+        setQrCode(transactionData.pix.qrcode);
+        setPixGenerated(true);
+        const bonus = calculateBonus(Number(depositAmount));
+        onCreditChange(user.credits + Number(depositAmount) + bonus);
+        if (onDepositSuccess) {
+          onDepositSuccess();
+        }
+      } else {
+        console.log('Pagamento ainda não processado:', transactionData);
+        setError('Pagamento não processado. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao verificar o status do pagamento:', error);
+      setError('Erro ao verificar o status do pagamento. Tente novamente.');
+    }
   };
 
-  console.log('Payload enviado à API:', JSON.stringify(requestData, null, 2));
+  const generatePix = async (amount: number) => {
+    setLoadingPix(true);
+    setPixGenerated(false);
+    setError(null);
 
-  const secretKey = "sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR";
-  const encodedSecretKey = btoa(`${secretKey}:x`);
+    // Verifica se os dados do cliente estão completos
+    if (!user.name || !user.email || !user.phone || !user.document) {
+      setError('Dados do cliente estão incompletos. Verifique nome, e-mail, telefone e documento.');
+      setLoadingPix(false);
+      return;
+    }
 
-  try {
-    const response = await axios.post(
-      'https://api.everpaygateway.com/v1/transactions',
-      requestData,
-      {
-        headers: {
-          Authorization: `Basic ${encodedSecretKey}`,
-          'Content-Type': 'application/json',
+    // Determina o tipo do documento (CPF ou CNPJ)
+    const isCpf = user.document.length === 11; // CPF tem 11 caracteres
+    const documentType = isCpf ? 'cpf' : 'cnpj'; // Considera CPF ou CNPJ
+
+    const requestData = {
+      amount: amount * 100, // Valor em centavos
+      paymentMethod: 'pix',
+      customer: {
+        name: user.name.trim(),
+        email: user.email.trim().toLowerCase(),
+        phone: user.phone.trim().replace(/\D/g, ''),
+        document: {
+          number: user.document.trim().replace(/\D/g, ''),
+          type: documentType,
         },
-      }
-    );
+      },
+      items: [
+        {
+          title: 'Depósito Mentira Verdadeira',
+          unitPrice: amount * 100,
+          quantity: 1,
+          tangible: true,
+        },
+      ],
+      pix: {
+        expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+      },
+      metadata: {
+        description: 'Depósito Mentira Verdadeira',
+      },
+    };
 
-    console.log('Response Data:', response.data);
+    console.log('Payload enviado à API:', JSON.stringify(requestData, null, 2));
 
-    // Verificar se o pagamento foi realizado com sucesso
-    if (response.data.paidAmount > 0) {
-      setQrCode(response.data.pix.qrcode);
-      setPixGenerated(true);
+    const secretKey = "sk_live_UvCzy852ZMMdg9XG8uTsu1AnJrBRjjXEMgRsVjUVOR";
+    const encodedSecretKey = btoa(`${secretKey}:x`);
 
-      const bonus = calculateBonus(amount);
-      onCreditChange(user.credits + amount + bonus);
-      if (onDepositSuccess) {
-        onDepositSuccess();
-      }
-    } else {
-      setError('Pagamento não foi processado. Tente novamente.');
-    }
-  } catch (error: any) {
-    console.error('Erro ao gerar PIX:', error);
-    if (error.response) {
-      console.error('Response Data:', error.response.data);
-      const apiErrors = error.response.data?.message || [];
-      if (Array.isArray(apiErrors)) {
-        setError(`Erro(s): ${apiErrors.join(' | ')}`);
+    try {
+      const response = await axios.post(
+        'https://api.everpaygateway.com/v1/transactions',
+        requestData,
+        {
+          headers: {
+            Authorization: `Basic ${encodedSecretKey}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log('Response Data:', response.data);
+
+      // Verificar se o pagamento foi realizado com sucesso
+      if (response.data.paidAmount > 0) {
+        setQrCode(response.data.pix.qrcode);
+        setPixGenerated(true);
+        const bonus = calculateBonus(amount);
+        onCreditChange(user.credits + amount + bonus);
+        if (onDepositSuccess) {
+          onDepositSuccess();
+        }
       } else {
-        setError('Erro desconhecido ao processar a requisição.');
+        setError('Pagamento não foi processado. Tentando verificar status...');
+        // Se o pagamento não foi confirmado, verifique o status
+        checkPaymentStatus(response.data.id);
       }
-    } else {
-      setError('Erro de rede ou configuração. Tente novamente.');
+    } catch (error: any) {
+      console.error('Erro ao gerar PIX:', error);
+      if (error.response) {
+        console.error('Response Data:', error.response.data);
+        const apiErrors = error.response.data?.message || [];
+        if (Array.isArray(apiErrors)) {
+          setError(`Erro(s): ${apiErrors.join(' | ')}`);
+        } else {
+          setError('Erro desconhecido ao processar a requisição.');
+        }
+      } else {
+        setError('Erro de rede ou configuração. Tente novamente.');
+      }
+    } finally {
+      setLoadingPix(false);
     }
-  } finally {
-    setLoadingPix(false);
-  }
-};
+  };
 
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
