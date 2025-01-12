@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Brain, LogIn, UserPlus, HelpCircle, Shield, Lock, Sparkles, Lightbulb, Coins, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 import Login from './components/Login';
 import Register from './components/Register';
 import GameRules from './components/GameRules';
 import Game from './components/Game';
-import AdminDashboard from './components/AdminDashboard';
+import Dashboard from './components/Dashboard';
 import { User } from './types';
-import { isAdmin, saveUserState, loadUserState, clearUserState } from './lib/auth';
+import { saveUserState, loadUserState, clearUserState } from './lib/auth';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'welcome' | 'login' | 'register' | 'rules' | 'game' | 'admin'>('welcome');
   const [credits, setCredits] = useState(0);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const savedUser = loadUserState();
@@ -44,12 +46,14 @@ export default function App() {
     clearUserState();
   };
 
-  const handleAdminLogin = (email: string, password: string) => {
-    if (isAdmin(email, password)) {
-      setCurrentView('admin');
-    } else {
-      alert('Credenciais de administrador inválidas');
-    }
+  const handleAdminSuccess = () => {
+    setIsAdmin(true);
+    setCurrentView('admin');
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    setCurrentView('welcome');
   };
 
   const faqs = [
@@ -74,7 +78,7 @@ export default function App() {
   const renderView = () => {
     switch (currentView) {
       case 'login':
-        return <Login onBack={() => setCurrentView('welcome')} onSuccess={handleLogin} />;
+        return <Login onBack={() => setCurrentView('welcome')} onSuccess={handleLogin} onAdminSuccess={handleAdminSuccess} />;
       case 'register':
         return <Register onBack={() => setCurrentView('welcome')} onSuccess={handleRegister} />;
       case 'rules':
@@ -93,7 +97,7 @@ export default function App() {
           />
         );
       case 'admin':
-        return <AdminDashboard onBack={() => setCurrentView('welcome')} />;
+        return <Dashboard user={{ name: 'Admin', email: 'admin@gmail.com', credits: 0, referralCode: '', password: '' }} onLogout={handleAdminLogout} isAdmin={true} />;
       default:
         return (
           <div className="space-y-12 md:space-y-20 text-center relative z-10">
@@ -235,12 +239,30 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-950 to-slate-900 relative">
-      <div className="absolute inset-0 matrix-bg"></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-500/5"></div>
-      <div className="container mx-auto py-4 md:py-8 relative flex-grow">
-        {renderView()}
-      </div>
-    </div>
+    <Router>
+      <Switch>
+        <Route path="/register">
+          <Register onBack={() => {}} onSuccess={handleRegister} />
+        </Route>
+        <Route path="/login">
+          <Login onBack={() => {}} onSuccess={handleLogin} />
+        </Route>
+        <Route path="/admin/login">
+          <AdminLogin onBack={() => {}} onSuccess={setAdmin} />
+        </Route>
+        <Route path="/admin/dashboard">
+          {admin ? <AdminDashboard user={admin} onLogout={handleAdminLogout} /> : <AdminLogin onBack={() => {}} onSuccess={setAdmin} />}
+        </Route>
+        <Route path="/">
+          <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-950 to-slate-900 relative">
+            <div className="absolute inset-0 matrix-bg"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-500/5"></div>
+            <div className="container mx-auto py-4 md:py-8 relative flex-grow">
+              {renderView()}
+            </div>
+          </div>
+        </Route>
+      </Switch>
+    </Router>
   );
 }
