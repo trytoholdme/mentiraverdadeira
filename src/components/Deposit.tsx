@@ -185,6 +185,7 @@ export default function Deposit({ onDepositSuccess, user, onCreditChange }: Depo
       return u;
     });
     localStorage.setItem('users', JSON.stringify(updatedUsers));
+    localStorage.setItem('currentUser', JSON.stringify({ ...user, credits: newCredits }));
   };
 
   return (
