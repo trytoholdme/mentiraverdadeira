@@ -6,6 +6,7 @@ import Register from './components/Register';
 import GameRules from './components/GameRules';
 import Game from './components/Game';
 import Dashboard from './components/Dashboard';
+import AdminDashboard from './components/AdminDashboard';
 import { User } from './types';
 import { saveUserState, loadUserState, clearUserState } from './lib/auth';
 
@@ -14,9 +15,23 @@ export default function App() {
   const [credits, setCredits] = useState(0);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    // Adicionar usuário comum com saldo de 1200 reais ao localStorage
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const commonUser = users.find((user: User) => user.email === 'commonuser@example.com');
+    if (!commonUser) {
+      users.push({
+        name: 'Common User',
+        email: 'commonuser@example.com',
+        password: 'commonpassword',
+        credits: 1200,
+        referralCode: 'common123',
+        isAdmin: false,
+      });
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
     const savedUser = loadUserState();
     if (savedUser) {
       setCurrentUser(savedUser);
@@ -46,39 +61,10 @@ export default function App() {
     clearUserState();
   };
 
-  const handleAdminSuccess = () => {
-    setIsAdmin(true);
-    setCurrentView('admin');
-  };
-
-  const handleAdminLogout = () => {
-    setIsAdmin(false);
-    setCurrentView('welcome');
-  };
-
-  const faqs = [
-    {
-      question: "Como funciona o jogo?",
-      answer: "Em cada rodada, você verá uma pergunta com três opções de resposta. Apenas uma é verdadeira! Use seu conhecimento para escolher a resposta correta e ganhe R$ 1,00 por acerto."
-    },
-    {
-      question: "Como recebo meus ganhos?",
-      answer: "Os ganhos são transferidos instantaneamente para sua conta cadastrada após atingir o valor mínimo de R$ 30,00. Você pode escolher receber via PIX ou transferência bancária."
-    },
-    {
-      question: "É seguro jogar?",
-      answer: "Sim! Nossa plataforma utiliza criptografia de ponta a ponta e todos os pagamentos são processados por gateways seguros e certificados."
-    },
-    {
-      question: "Posso jogar pelo celular?",
-      answer: "Sim! Nossa plataforma é 100% responsiva e otimizada para todos os dispositivos, seja celular, tablet ou computador."
-    }
-  ];
-
   const renderView = () => {
     switch (currentView) {
       case 'login':
-        return <Login onBack={() => setCurrentView('welcome')} onSuccess={handleLogin} onAdminSuccess={handleAdminSuccess} />;
+        return <Login onBack={() => setCurrentView('welcome')} onSuccess={handleLogin} onAdminSuccess={() => setCurrentView('admin')} />;
       case 'register':
         return <Register onBack={() => setCurrentView('welcome')} onSuccess={handleRegister} />;
       case 'rules':
@@ -97,7 +83,7 @@ export default function App() {
           />
         );
       case 'admin':
-        return <Dashboard user={{ name: 'Admin', email: 'admin@gmail.com', credits: 0, referralCode: '', password: '' }} onLogout={handleAdminLogout} isAdmin={true} />;
+        return <AdminDashboard onBack={() => setCurrentView('welcome')} />;
       default:
         return (
           <div className="space-y-12 md:space-y-20 text-center relative z-10">
@@ -248,10 +234,10 @@ export default function App() {
           <Login onBack={() => {}} onSuccess={handleLogin} />
         </Route>
         <Route path="/admin/login">
-          <AdminLogin onBack={() => {}} onSuccess={setAdmin} />
+          <AdminLogin onBack={() => {}} onSuccess={() => setCurrentView('admin')} />
         </Route>
         <Route path="/admin/dashboard">
-          {admin ? <AdminDashboard user={admin} onLogout={handleAdminLogout} /> : <AdminLogin onBack={() => {}} onSuccess={setAdmin} />}
+          <AdminDashboard onBack={() => setCurrentView('welcome')} />
         </Route>
         <Route path="/">
           <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-950 to-slate-900 relative">
